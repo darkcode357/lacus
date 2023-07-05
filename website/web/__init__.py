@@ -81,7 +81,7 @@ class Enqueue(Resource):
     @api.produces(['text/text'])
     def post(self):
         to_query: Dict = request.get_json(force=True)
-        perma_uuid = lacus.core.enqueue(
+        return lacus.core.enqueue(
             url=to_query.get('url'),
             document_name=to_query.get('document_name'),
             document=to_query.get('document'),
@@ -89,7 +89,9 @@ class Enqueue(Resource):
             browser=to_query.get('browser'),
             device_name=to_query.get('device_name'),
             user_agent=to_query.get('user_agent'),
-            proxy=lacus.global_proxy if lacus.global_proxy else to_query.get('proxy'),
+            proxy=lacus.global_proxy
+            if lacus.global_proxy
+            else to_query.get('proxy'),
             general_timeout_in_sec=to_query.get('general_timeout_in_sec'),
             cookies=to_query.get('cookies'),
             headers=to_query.get('headers'),
@@ -104,9 +106,8 @@ class Enqueue(Resource):
             force=to_query.get('force', False),
             recapture_interval=to_query.get('recapture_interval', 300),
             priority=to_query.get('priority', 0),
-            uuid=to_query.get('uuid', None)
+            uuid=to_query.get('uuid', None),
         )
-        return perma_uuid
 
 
 @api.route('/capture_status/<string:capture_uuid>')

@@ -41,8 +41,9 @@ class AbstractManager(ABC):
                     except OSError:
                         print(f'Got a dead script: {script_name} - {pid}')
                         r.srem(f'service|{script_name}', pid)
-                        other_same_services = r.scard(f'service|{script_name}')
-                        if other_same_services:
+                        if other_same_services := r.scard(
+                            f'service|{script_name}'
+                        ):
                             r.zadd('running', {script_name: other_same_services})
                         else:
                             r.zrem('running', script_name)
@@ -116,12 +117,11 @@ class AbstractManager(ABC):
             return
         kill_order = [signal.SIGWINCH, signal.SIGTERM, signal.SIGINT, signal.SIGKILL]
         for sig in kill_order:
-            if self.process.poll() is None:
-                self.logger.info(f'Sending {sig} to {self.process.pid}.')
-                self.process.send_signal(sig)
-                time.sleep(1)
-            else:
+            if self.process.poll() is not None:
                 break
+            self.logger.info(f'Sending {sig} to {self.process.pid}.')
+            self.process.send_signal(sig)
+            time.sleep(1)
         else:
             self.logger.warning(f'Unable to kill {self.process.pid}, keep sending SIGKILL')
             while self.process.poll() is None:

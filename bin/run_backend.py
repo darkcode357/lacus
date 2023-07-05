@@ -19,7 +19,7 @@ def check_running(name: str) -> bool:
         return False
     try:
         r = Redis(unix_socket_path=socket_path)
-        return True if r.ping() else False
+        return bool(r.ping())
     except ConnectionError:
         return False
 
@@ -46,17 +46,18 @@ def launch_all():
 def check_all(stop: bool=False):
     backends: Dict[str, bool] = {'cache': False}
     while True:
-        for db_name in backends.keys():
+        for db_name in backends:
             try:
                 backends[db_name] = check_running(db_name)
             except Exception:
                 backends[db_name] = False
-        if stop:
-            if not any(running for running in backends.values()):
-                break
-        else:
-            if all(running for running in backends.values()):
-                break
+        if (
+            stop
+            and not any(backends.values())
+            or not stop
+            and all(backends.values())
+        ):
+            break
         for db_name, running in backends.items():
             if not stop and not running:
                 print(f"Waiting on {db_name} to start")

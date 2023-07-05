@@ -63,24 +63,19 @@ def get_config(config_type: str, entry: Optional[str]=None, quiet: bool=False) -
     if not configs:
         load_configs()
     if config_type in configs:
-        if entry:
-            if entry in configs[config_type]:
-                return configs[config_type][entry]
-            else:
-                if not quiet:
-                    logger.warning(f'Unable to find {entry} in config file.')
-        else:
+        if not entry:
             return configs[config_type]
-    else:
+        if entry in configs[config_type]:
+            return configs[config_type][entry]
         if not quiet:
-            logger.warning(f'No {config_type} config file available.')
+            logger.warning(f'Unable to find {entry} in config file.')
+    elif not quiet:
+        logger.warning(f'No {config_type} config file available.')
     if not quiet:
         logger.warning(f'Falling back on sample config, please initialize the {config_type} config file.')
     with (get_homedir() / 'config' / f'{config_type}.json.sample').open() as _c:
         sample_config = json.load(_c)
-    if entry:
-        return sample_config[entry]
-    return sample_config
+    return sample_config[entry] if entry else sample_config
 
 
 def safe_create_dir(to_create: Path) -> None:
