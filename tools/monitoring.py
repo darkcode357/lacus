@@ -96,8 +96,7 @@ if __name__ == '__main__':
     for uuid, start_time in m.ongoing:
         s = Padding(f'{uuid}: {start_time}', (0, 2))
         console.print(s)
-        settings = m.capture_settings(uuid)
-        if settings:
+        if settings := m.capture_settings(uuid):
             s = Padding(json.dumps(settings, indent=2), (0, 4))
             console.print(s)
 
